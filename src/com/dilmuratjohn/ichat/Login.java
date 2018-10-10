@@ -20,6 +20,10 @@ public class Login extends JFrame {
     private JButton btnLogin;
 
     public Login() {
+        this.createWindow();
+    }
+
+    private void createWindow() {
         this.setUp();
         this.createPanel();
         this.addParts();
@@ -95,7 +99,7 @@ public class Login extends JFrame {
 
     private void login(String name, String address, int port) {
         dispose();
-        System.out.println(name + ", " + address + ", " + port);
+        new Client(name, address, port);
     }
 
     public static void main(String[] args) {
