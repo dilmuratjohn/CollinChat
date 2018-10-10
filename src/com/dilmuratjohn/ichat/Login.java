@@ -3,21 +3,29 @@ package com.dilmuratjohn.ichat;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Login extends JFrame {
 
     private static final long serialVersionUID = 1L;
 
-    private JTextField textName;
-    private JTextField textAddress;
-    private JTextField textPort;
-    private JLabel labelName;
-    private JLabel labelAddress;
-    private JLabel labelPort;
-    private JButton buttonLogin;
+    private JPanel panel;
+    private JTextField txtName;
+    private JTextField txtAddress;
+    private JTextField txtPort;
+    private JLabel lblName;
+    private JLabel lblAddress;
+    private JLabel lblPort;
+    private JButton btnLogin;
 
     public Login() {
+        this.setUp();
+        this.createPanel();
+        this.addParts();
+    }
 
+    private void setUp() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
@@ -29,51 +37,65 @@ public class Login extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(300, 400);
         setLocationRelativeTo(null);
+    }
 
-        JPanel panel = new JPanel();
-        panel.setBorder(new EmptyBorder(5, 5, 5, 5));
-        panel.setLayout(null);
-        setContentPane(panel);
+    private void createPanel() {
+        this.panel = new JPanel();
+        this.panel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        this.panel.setLayout(null);
+        setContentPane(this.panel);
+    }
 
-        this.addParts(panel);
+    private void addParts() {
+        // name text area
+        this.txtName = new JTextField();
+        this.txtName.setBounds(125, 50, 150, 30);
+        this.txtName.setColumns(10);
+        // address text area
+        this.txtAddress = new JTextField();
+        this.txtAddress.setBounds(125, 100, 150, 30);
+        this.txtAddress.setColumns(10);
+        // port text area
+        this.txtPort = new JTextField();
+        this.txtPort.setBounds(125, 150, 150, 30);
+        this.txtPort.setColumns(10);
+        // name label
+        this.lblName = new JLabel("Name:");
+        this.lblName.setBounds(30, 50, 70, 30);
+        // address label
+        this.lblAddress = new JLabel("IP Address:");
+        this.lblAddress.setBounds(30, 100, 70, 30);
+        // port label
+        this.lblPort = new JLabel("Port:");
+        this.lblPort.setBounds(30, 150, 70, 30);
+        // login button
+        this.btnLogin = new JButton();
+        this.btnLogin.setBounds(100, 300, 100, 30);
+        this.btnLogin.setText("Login");
+        this.btnLogin.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("[Login] -- login button clicked.");
+                String name = txtName.getText();
+                String address = txtAddress.getText();
+                int port = Integer.parseInt(txtPort.getText());
+                login(name, address, port);
+            }
+        });
+
+        panel.add(this.txtName);
+        panel.add(this.txtAddress);
+        panel.add(this.txtPort);
+        panel.add(this.lblName);
+        panel.add(this.lblAddress);
+        panel.add(this.lblPort);
+        panel.add(this.btnLogin);
 
     }
 
-    private void addParts(JPanel panel) {
-
-        this.textName = new JTextField();
-        this.textName.setBounds(125, 50, 150, 30);
-        this.textName.setColumns(10);
-
-        this.textAddress = new JTextField();
-        this.textAddress.setBounds(125, 100, 150, 30);
-        this.textAddress.setColumns(10);
-
-        this.textPort = new JTextField();
-        this.textPort.setBounds(125, 150, 150, 30);
-        this.textPort.setColumns(10);
-
-        this.labelName = new JLabel("Name:");
-        this.labelName.setBounds(30, 50, 70, 30);
-
-        this.labelAddress = new JLabel("IP Address:");
-        this.labelAddress.setBounds(30, 100, 70, 30);
-
-        this.labelPort = new JLabel("Port:");
-        this.labelPort.setBounds(30, 150, 70, 30);
-
-        this.buttonLogin = new JButton();
-        this.buttonLogin.setBounds(100, 300, 100, 30);
-        this.buttonLogin.setText("Login");
-
-        panel.add(this.textName);
-        panel.add(this.textAddress);
-        panel.add(this.textPort);
-        panel.add(this.labelName);
-        panel.add(this.labelAddress);
-        panel.add(this.labelPort);
-        panel.add(this.buttonLogin);
-
+    private void login(String name, String address, int port) {
+        dispose();
+        System.out.println(name + ", " + address + ", " + port);
     }
 
     public static void main(String[] args) {
