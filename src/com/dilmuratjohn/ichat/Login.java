@@ -1,6 +1,5 @@
 package com.dilmuratjohn.ichat;
 
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -9,50 +8,71 @@ public class Login extends JFrame {
 
     private static final long serialVersionUID = 1L;
 
-    private JPanel contentPane;
     private JTextField textName;
+    private JTextField textAddress;
+    private JTextField textPort;
     private JLabel labelName;
-    private JTextField textPassword;
-    private JLabel labelPassword;
+    private JLabel labelAddress;
+    private JLabel labelPort;
+    private JButton buttonLogin;
 
     public Login() {
+
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         setTitle("Login");
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(300, 500);
+        setSize(300, 400);
         setLocationRelativeTo(null);
 
-        contentPane = new JPanel();
-        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        contentPane.setLayout(null);
-        setContentPane(contentPane);
+        JPanel panel = new JPanel();
+        panel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        panel.setLayout(null);
+        setContentPane(panel);
 
-        this.addParts();
-
+        this.addParts(panel);
 
     }
 
-    private void addParts() {
+    private void addParts(JPanel panel) {
 
-        textName = new JTextField();
-        textName.setBounds(125, 50, 150, 30);
-        textName.setColumns(10);
+        this.textName = new JTextField();
+        this.textName.setBounds(125, 50, 150, 30);
+        this.textName.setColumns(10);
 
-        textPassword = new JTextField();
-        textPassword.setBounds(125, 100, 150, 30);
-        textPassword.setColumns(10);
+        this.textAddress = new JTextField();
+        this.textAddress.setBounds(125, 100, 150, 30);
+        this.textAddress.setColumns(10);
 
-        labelName = new JLabel("Name:");
-        labelName.setBounds(30, 50, 70, 30);
+        this.textPort = new JTextField();
+        this.textPort.setBounds(125, 150, 150, 30);
+        this.textPort.setColumns(10);
 
-        labelPassword = new JLabel("Password:");
-        labelPassword.setBounds(30, 100, 70, 30);
+        this.labelName = new JLabel("Name:");
+        this.labelName.setBounds(30, 50, 70, 30);
 
-        this.contentPane.add(textName);
-        this.contentPane.add(textPassword);
-        this.contentPane.add(labelName);
-        this.contentPane.add(labelPassword);
+        this.labelAddress = new JLabel("IP Address:");
+        this.labelAddress.setBounds(30, 100, 70, 30);
+
+        this.labelPort = new JLabel("Port:");
+        this.labelPort.setBounds(30, 150, 70, 30);
+
+        this.buttonLogin = new JButton();
+        this.buttonLogin.setBounds(100, 300, 100, 30);
+        this.buttonLogin.setText("Login");
+
+        panel.add(this.textName);
+        panel.add(this.textAddress);
+        panel.add(this.textPort);
+        panel.add(this.labelName);
+        panel.add(this.labelAddress);
+        panel.add(this.labelPort);
+        panel.add(this.buttonLogin);
 
     }
 
