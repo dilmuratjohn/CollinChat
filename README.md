@@ -7,3 +7,4 @@
 > - Ep.5 The Client Window
 > - Ep.6 Grid Bag Layout
 > - Ep.7 Main Client Window
+> - Ep.8 Text History

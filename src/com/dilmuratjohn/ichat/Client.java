@@ -9,6 +9,7 @@ class Client extends JFrame {
     private static final long serialVersionUID = 1L;
 
     private JPanel panel;
+    private JTextArea txtHistory;
     private String name;
     private String address;
     private int port;
@@ -19,7 +20,7 @@ class Client extends JFrame {
         this.port = port;
 
         this.createWindow();
-        this.createPanel();
+        this.console("Attempting a connection to " + address + ":" + port + ", user: " + name + "...");
     }
 
     private void createWindow() {
@@ -28,15 +29,12 @@ class Client extends JFrame {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 700);
         setLocationRelativeTo(null);
-        setVisible(true);
         setTitle("Collin Chat Client");
-        requestFocus();
-    }
 
-    private void createPanel() {
         this.panel = new JPanel();
         this.panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -47,17 +45,15 @@ class Client extends JFrame {
         layout.rowWeights = new double[]{1.0, Double.MIN_VALUE};
         this.panel.setLayout(layout);
 
-        JTextArea txtHistory = new JTextArea();
-        txtHistory.setEditable(false);
+        this.txtHistory = new JTextArea();
         GridBagConstraints gbc_txtHistory = new GridBagConstraints();
         gbc_txtHistory.fill = GridBagConstraints.BOTH;
         gbc_txtHistory.gridx = 1;
         gbc_txtHistory.gridy = 1;
         gbc_txtHistory.gridwidth = 3;
-        this.panel.add(txtHistory, gbc_txtHistory);
+        this.panel.add(this.txtHistory, gbc_txtHistory);
 
-        JTextArea txtMessage = new JTextArea("say some thing.");
-        txtMessage.requestFocus();
+        JTextArea txtMessage = new JTextArea();
         GridBagConstraints gbc_txtMessage = new GridBagConstraints();
         gbc_txtMessage.fill = GridBagConstraints.BOTH;
         gbc_txtMessage.gridx = 1;
@@ -72,5 +68,15 @@ class Client extends JFrame {
         this.panel.add(btnSend, gbc_btnSend);
 
         setContentPane(this.panel);
+        setVisible(true);
+
+        txtHistory.setEditable(false);
+        txtMessage.requestFocusInWindow();
+    }
+
+    public void console(String message){
+
+        this.txtHistory.append(message + "\n\r");
+
     }
 }
