@@ -21,21 +21,15 @@ public class Login extends JFrame {
 
     public Login() {
         this.createWindow();
+        this.createPanel();
     }
 
     private void createWindow() {
-        this.setUp();
-        this.createPanel();
-        this.addParts();
-    }
-
-    private void setUp() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         setTitle("Login");
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -47,10 +41,6 @@ public class Login extends JFrame {
         this.panel = new JPanel();
         this.panel.setBorder(new EmptyBorder(5, 5, 5, 5));
         this.panel.setLayout(null);
-        setContentPane(this.panel);
-    }
-
-    private void addParts() {
         // name text area
         this.txtName = new JTextField();
         this.txtName.setBounds(125, 50, 150, 30);
@@ -79,14 +69,12 @@ public class Login extends JFrame {
         this.btnLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("[Login] -- login button clicked.");
                 String name = txtName.getText();
                 String address = txtAddress.getText();
                 int port = Integer.parseInt(txtPort.getText());
                 login(name, address, port);
             }
         });
-
         panel.add(this.txtName);
         panel.add(this.txtAddress);
         panel.add(this.txtPort);
@@ -94,7 +82,7 @@ public class Login extends JFrame {
         panel.add(this.lblAddress);
         panel.add(this.lblPort);
         panel.add(this.btnLogin);
-
+        setContentPane(this.panel);
     }
 
     private void login(String name, String address, int port) {
