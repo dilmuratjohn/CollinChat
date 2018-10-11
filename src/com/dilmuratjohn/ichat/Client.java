@@ -21,10 +21,9 @@ class Client extends JFrame {
 
     private String mMame;
     private String mAddress;
-    private int mPort;
-
-    private DatagramSocket mSocket;
     private InetAddress mIP;
+    private int mPort;
+    private DatagramSocket mSocket;
     private Thread mThreadSend;
 
     Client(String name, String address, int port) {
@@ -32,8 +31,7 @@ class Client extends JFrame {
         mMame = name;
         mAddress = address;
         mPort = port;
-        mAddress = "localhost";
-        mPort = 9198;
+
         createWindow();
 
         boolean connect = openConnection(mAddress);

@@ -4,8 +4,12 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Server implements Runnable {
+
+    private List<ServerClient> clients = new ArrayList<ServerClient>();
 
     private int mPort;
     private boolean running = false;
@@ -54,6 +58,10 @@ public class Server implements Runnable {
                         e.printStackTrace();
                     }
                     String message = new String(packet.getData(), packet.getOffset(), packet.getLength());
+                    clients.add(new ServerClient("Collin", packet.getAddress(), packet.getPort(), 0));
+                    for(ServerClient client: clients){
+                        System.out.println(client.mAddress + ":" + client.mPort);
+                    }
                     System.out.println(message);
                 }
             }
