@@ -2,9 +2,8 @@ package com.dilmuratjohn.ichat;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
@@ -12,21 +11,22 @@ class Client extends JFrame {
 
     private static final long serialVersionUID = 1L;
 
-    private JPanel panel;
-    private JTextArea txtHistory;
-    private JTextArea txtMessage;
-    private JButton btnSend;
-    private String name;
-    private String address;
-    private int port;
+    private JPanel mPanel;
+    private JTextArea mTxtHistory;
+    private JTextArea mTxtMessage;
+    private JButton mBtnSend;
+    private DefaultCaret mCaret;
+    private String mMame;
+    private String mAddress;
+    private int mPort;
 
     Client(String name, String address, int port) {
-        this.name = name;
-        this.address = address;
-        this.port = port;
+        mMame = name;
+        mAddress = address;
+        mPort = port;
 
-        this.createWindow();
-        this.console("Attempting a connection to " + address + ":" + port + ", user: " + name + "...");
+        createWindow();
+        console("Attempting a connection to " + mAddress + ":" + port + ", user: " + mMame + "...");
     }
 
     private void createWindow() {
@@ -39,68 +39,84 @@ class Client extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 700);
         setLocationRelativeTo(null);
+        setResizable(false);
         setTitle("Collin Chat Client");
-
-        this.panel = new JPanel();
-        this.panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         GridBagLayout layout = new GridBagLayout();
         layout.columnWidths = new int[]{55, 670, 15, 25, 15};
-        layout.rowHeights = new int[]{30, 595, 15, 25, 15};
+        layout.rowHeights = new int[]{30, 590, 15, 30, 15};
         layout.columnWeights = new double[]{1.0, Double.MIN_VALUE};
         layout.rowWeights = new double[]{1.0, Double.MIN_VALUE};
-        this.panel.setLayout(layout);
 
-        this.txtHistory = new JTextArea();
-        GridBagConstraints gbc_txtHistory = new GridBagConstraints();
-        gbc_txtHistory.fill = GridBagConstraints.BOTH;
-        gbc_txtHistory.gridx = 1;
-        gbc_txtHistory.gridy = 1;
-        gbc_txtHistory.gridwidth = 3;
-        this.panel.add(this.txtHistory, gbc_txtHistory);
+        mTxtHistory = new JTextArea();
+        mCaret = (DefaultCaret) mTxtHistory.getCaret();
+        mCaret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+        JScrollPane scrollHistory = new JScrollPane(mTxtHistory);
+        GridBagConstraints scrollConstraintsHistory = new GridBagConstraints();
+        scrollConstraintsHistory.fill = GridBagConstraints.BOTH;
+        scrollConstraintsHistory.gridx = 1;
+        scrollConstraintsHistory.gridy = 1;
+        scrollConstraintsHistory.gridwidth = 3;
 
-        this.txtMessage = new JTextArea();
-        GridBagConstraints gbc_txtMessage = new GridBagConstraints();
-        gbc_txtMessage.fill = GridBagConstraints.BOTH;
-        gbc_txtMessage.gridx = 1;
-        gbc_txtMessage.gridy = 3;
-        gbc_txtMessage.insets = new Insets(5, 0, 5, 0);
-        this.panel.add(txtMessage, gbc_txtMessage);
+        mTxtMessage = new JTextArea();
+        JScrollPane scrollMessage = new JScrollPane(mTxtMessage, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        GridBagConstraints scrollConstraintsMessage = new GridBagConstraints();
+        scrollConstraintsMessage.insets = new Insets(5, 0, 5, 0);
+        scrollConstraintsMessage.fill = GridBagConstraints.BOTH;
+        scrollConstraintsMessage.gridx = 1;
+        scrollConstraintsMessage.gridy = 3;
 
-        this.btnSend = new JButton("Send");
+        mBtnSend = new JButton("Send");
         GridBagConstraints gbc_btnSend = new GridBagConstraints();
-        gbc_btnSend.fill = GridBagConstraints.BOTH;
+        gbc_btnSend.fill = GridBagConstraints.HORIZONTAL;
         gbc_btnSend.gridx = 3;
         gbc_btnSend.gridy = 3;
-        this.panel.add(btnSend, gbc_btnSend);
 
-        setContentPane(this.panel);
+        mPanel = new JPanel();
+        mPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        mPanel.setLayout(layout);
+        mPanel.add(scrollHistory, scrollConstraintsHistory);
+        mPanel.add(scrollMessage, scrollConstraintsMessage);
+        mPanel.add(mBtnSend, gbc_btnSend);
+
+
+        setContentPane(mPanel);
         setVisible(true);
 
-        txtHistory.setEditable(false);
-        txtMessage.requestFocusInWindow();
-        txtMessage.addKeyListener(new KeyAdapter() {
+        mTxtHistory.setEditable(false);
+        mTxtHistory.setFont(new Font("Serif", Font.ITALIC, 17));
+        mTxtHistory.setLineWrap(true);
+        mTxtHistory.setWrapStyleWord(true);
+
+        mTxtMessage.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyPressed(KeyEvent e) {
+            public void keyReleased(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    send(txtMessage.getText());
+                    System.out.println(mTxtMessage.getText());
+                    send(mTxtMessage.getText());
                 }
             }
         });
-        btnSend.addActionListener(e -> {
-            send(txtMessage.getText());
+        mTxtMessage.requestFocusInWindow();
+        mTxtMessage.setFont(new Font("Serif", Font.ITALIC, 17));
+        mTxtMessage.setLineWrap(true);
+        mTxtMessage.setWrapStyleWord(true);
+
+        mBtnSend.addActionListener(e -> {
+            send(mTxtMessage.getText());
         });
 
-        txtMessage.requestFocusInWindow();
     }
 
     private void send(String message) {
+        message = message.trim();
         if (message.equals("")) return;
-        this.txtMessage.setText("");
-        console(name + ": " + message);
+        console(mMame + ": " + message);
+        mTxtMessage.setText("");
     }
 
     private void console(String message) {
-        this.txtHistory.append(message + "\n");
+        mTxtHistory.append(message + "\n");
+        mTxtHistory.setCaretPosition(mTxtHistory.getDocument().getLength());
     }
 }

@@ -9,3 +9,4 @@
 > - Ep.7 Main Client Window
 > - Ep.8 Text History
 > - Ep.9 Action and Key Listener
+> - Ep.10 Scrolling
