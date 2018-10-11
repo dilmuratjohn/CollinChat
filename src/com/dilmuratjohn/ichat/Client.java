@@ -21,15 +21,11 @@ class Client extends JFrame {
     private int mPort;
 
     Client(String name, String address, int port) {
+
         mMame = name;
         mAddress = address;
         mPort = port;
 
-        createWindow();
-        console("Attempting a connection to " + mAddress + ":" + port + ", user: " + mMame + "...");
-    }
-
-    private void createWindow() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
@@ -41,6 +37,15 @@ class Client extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
         setTitle("Collin Chat Client");
+
+        createWindow();
+        console("Attempting a connection to " + mAddress + ":" + port + ", user: " + mMame + "...");
+    }
+
+    private void createWindow() {
+
+        mPanel = new JPanel();
+        mPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         GridBagLayout layout = new GridBagLayout();
         layout.columnWidths = new int[]{55, 670, 15, 25, 15};
@@ -72,13 +77,10 @@ class Client extends JFrame {
         gbc_btnSend.gridx = 3;
         gbc_btnSend.gridy = 3;
 
-        mPanel = new JPanel();
-        mPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         mPanel.setLayout(layout);
         mPanel.add(scrollHistory, scrollConstraintsHistory);
         mPanel.add(scrollMessage, scrollConstraintsMessage);
         mPanel.add(mBtnSend, gbc_btnSend);
-
 
         setContentPane(mPanel);
         setVisible(true);
@@ -88,24 +90,22 @@ class Client extends JFrame {
         mTxtHistory.setLineWrap(true);
         mTxtHistory.setWrapStyleWord(true);
 
-        mTxtMessage.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    System.out.println(mTxtMessage.getText());
-                    send(mTxtMessage.getText());
-                }
-            }
-        });
         mTxtMessage.requestFocusInWindow();
         mTxtMessage.setFont(new Font("Serif", Font.ITALIC, 17));
         mTxtMessage.setLineWrap(true);
         mTxtMessage.setWrapStyleWord(true);
+        mTxtMessage.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    send(mTxtMessage.getText());
+                }
+            }
+        });
 
         mBtnSend.addActionListener(e -> {
             send(mTxtMessage.getText());
         });
-
     }
 
     private void send(String message) {
