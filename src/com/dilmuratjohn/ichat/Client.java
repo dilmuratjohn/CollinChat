@@ -6,6 +6,10 @@ import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 class Client extends JFrame {
 
@@ -20,11 +24,39 @@ class Client extends JFrame {
     private String mAddress;
     private int mPort;
 
+    private DatagramSocket mSocket;
+    private InetAddress mIP;
+
     Client(String name, String address, int port) {
 
         mMame = name;
         mAddress = address;
         mPort = port;
+
+        createWindow();
+
+        boolean connection = openConnection(mAddress, mPort);
+        if(!connection){
+            System.err.println("Connection failed." + mAddress + ":" + mPort);
+            console("Connection failed.");
+        }else {
+            System.out.println("Connection succeed." + mAddress + ":" + mPort);
+            console("Attempting a connection to " + mAddress + ":" + mPort + ", user: " + mMame + "...");
+        }
+    }
+
+    private boolean openConnection(String address, int port){
+        try {
+            mSocket = new DatagramSocket();
+            mIP = InetAddress.getByName(address);
+        } catch (UnknownHostException | SocketException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    private void createWindow() {
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -37,12 +69,6 @@ class Client extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
         setTitle("Collin Chat Client");
-
-        createWindow();
-        console("Attempting a connection to " + mAddress + ":" + port + ", user: " + mMame + "...");
-    }
-
-    private void createWindow() {
 
         mPanel = new JPanel();
         mPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -96,7 +122,7 @@ class Client extends JFrame {
         mTxtMessage.setWrapStyleWord(true);
         mTxtMessage.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyReleased(KeyEvent e) {
+            public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     send(mTxtMessage.getText());
                 }

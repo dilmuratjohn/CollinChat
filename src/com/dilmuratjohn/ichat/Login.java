@@ -17,24 +17,28 @@ public class Login extends JFrame {
     private JLabel mLblName;
     private JLabel mLblAddress;
     private JLabel mLblPort;
+    private JLabel mLblWarning;
     private JButton mBtnLogin;
 
     public Login() {
+
+        createPanel();
+    }
+
+
+    private void createPanel() {
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         setTitle("Login");
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(300, 400);
         setLocationRelativeTo(null);
-        createWindow();
-    }
-
-    private void createWindow() {
 
         mPanel = new JPanel();
         mPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -61,6 +65,10 @@ public class Login extends JFrame {
         mLblPort = new JLabel("Port:");
         mLblPort.setBounds(30, 150, 70, 30);
 
+        mLblWarning = new JLabel();
+        mLblWarning.setBounds(100, 270, 100, 30);
+        mLblWarning.setForeground(Color.RED);
+
         mBtnLogin = new JButton("Login");
         mBtnLogin.setBounds(100, 300, 100, 30);
         mBtnLogin.addActionListener(new ActionListener() {
@@ -68,7 +76,7 @@ public class Login extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String name = mTxtName.getText();
                 String address = mTxtAddress.getText();
-                int port = Integer.parseInt(mTxtPort.getText());
+                String port = (mTxtPort.getText());
                 login(name, address, port);
             }
         });
@@ -79,15 +87,33 @@ public class Login extends JFrame {
         mPanel.add(mLblName);
         mPanel.add(mLblAddress);
         mPanel.add(mLblPort);
+        mPanel.add(mLblWarning);
         mPanel.add(mBtnLogin);
 
         setContentPane(mPanel);
     }
 
-    private void login(String name, String address, int port) {
-        if(name.equals("")) name = "anonymous user";
-        dispose();
-        new Client(name, address, port);
+    private void login(String name, String address, String port) {
+        if (name.equals("")) {
+            name = "anonymous user";
+        }
+        if (address.equals("")) {
+            mLblWarning.setText(" empty address");
+            return;
+        }
+        if (port.equals("")) {
+            mLblWarning.setText("   empty port");
+            return;
+        }
+
+        try {
+            int iPort = Integer.parseInt(port);
+            new Client(name, address, iPort);
+            dispose();
+        } catch (Exception e) {
+            mLblWarning.setText("   wrong port");
+        }
+
     }
 
     public static void main(String[] args) {
