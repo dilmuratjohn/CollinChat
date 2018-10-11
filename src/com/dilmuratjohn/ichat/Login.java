@@ -108,7 +108,7 @@ public class Login extends JFrame {
 
         try {
             int iPort = Integer.parseInt(port);
-            new Client(name, address, iPort);
+            new ClientView(name, address, iPort);
             dispose();
         } catch (Exception e) {
             mLblWarning.setText("   wrong port");

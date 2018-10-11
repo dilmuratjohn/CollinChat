@@ -85,15 +85,15 @@ public class Server implements Runnable {
 
     private void process(DatagramPacket packet) {
         String message = new String(packet.getData(), packet.getOffset(), packet.getLength());
-        System.out.println(message);
         if (message.startsWith("/c/")) {
             UUID id = UUID.randomUUID();
             clients.add(new ServerClient(message.substring(3), packet.getAddress(), packet.getPort(), id));
-//            System.out.println(message.substring(3));
+            System.out.println(message.substring(3));
         } else if (message.startsWith("/m/")) {
+            System.out.println(packet.getAddress() + ":" + packet.getPort());
             sendToAll(message);
         } else {
-//            System.out.println(message);
+            System.out.println(message);
         }
     }
 }
