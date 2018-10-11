@@ -13,18 +13,15 @@ class Client extends JFrame {
 
     private static final long serialVersionUID = 1L;
 
-    private JPanel mPanel;
     private JTextArea mTxtHistory;
     private JTextArea mTxtMessage;
-    private JButton mBtnSend;
-    private DefaultCaret mCaret;
 
     private String mMame;
     private String mAddress;
     private InetAddress mIP;
     private int mPort;
     private DatagramSocket mSocket;
-    private Thread mThreadSend;
+    private boolean running = false;
 
     Client(String name, String address, int port) {
 
@@ -36,14 +33,18 @@ class Client extends JFrame {
 
         boolean connect = openConnection(mAddress);
         if (!connect) {
+            running = false;
             System.err.println("Connection failed." + mAddress + ":" + mPort);
             console("Connection failed.");
         } else {
+            running = true;
             System.out.println("Connection succeed." + mAddress + ":" + mPort);
             console("Attempting a connection to " + mAddress + ":" + mPort + ", user: " + mMame + "...");
-            String connection = "/c/"  + mMame;
+            String connection = "/c/" + mMame;
             send(connection.getBytes());
+            receive();
         }
+
     }
 
     private boolean openConnection(String address) {
@@ -57,15 +58,23 @@ class Client extends JFrame {
         return true;
     }
 
-    private String receive() {
-        byte[] data = new byte[1024];
-        DatagramPacket packet = new DatagramPacket(data, data.length);
-        try {
-            mSocket.receive(packet);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return new String(packet.getData());
+    private void receive() {
+        Thread receive = new Thread("Client") {
+            public void run() {
+                while (running){
+                    byte[] data = new byte[1024];
+                    DatagramPacket packet = new DatagramPacket(data, data.length);
+                    try {
+                        mSocket.receive(packet);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    String message = new String(packet.getData(), packet.getOffset(), packet.getLength());
+                    console(message.substring(3));
+                }
+            }
+        };
+        receive.start();
     }
 
     private void send(String message) {
@@ -73,12 +82,13 @@ class Client extends JFrame {
         if (message.equals("")) return;
         String string = mMame + ": " + message;
         console(string);
+        string = "/m/" + string;
         send(string.getBytes());
         mTxtMessage.setText("");
     }
 
     private void send(final byte[] data) {
-        mThreadSend = new Thread("send") {
+        Thread mThreadSend = new Thread("send") {
             public void run() {
                 DatagramPacket packet = new DatagramPacket(data, data.length, mIP, mPort);
                 try {
@@ -111,8 +121,8 @@ class Client extends JFrame {
         setResizable(false);
         setTitle("Collin Chat Client");
 
-        mPanel = new JPanel();
-        mPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        JPanel panel = new JPanel();
+        panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         GridBagLayout layout = new GridBagLayout();
         layout.columnWidths = new int[]{55, 670, 15, 25, 15};
@@ -121,7 +131,7 @@ class Client extends JFrame {
         layout.rowWeights = new double[]{1.0, Double.MIN_VALUE};
 
         mTxtHistory = new JTextArea();
-        mCaret = (DefaultCaret) mTxtHistory.getCaret();
+        DefaultCaret mCaret = (DefaultCaret) mTxtHistory.getCaret();
         mCaret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         JScrollPane scrollHistory = new JScrollPane(mTxtHistory);
         GridBagConstraints scrollConstraintsHistory = new GridBagConstraints();
@@ -138,18 +148,18 @@ class Client extends JFrame {
         scrollConstraintsMessage.gridx = 1;
         scrollConstraintsMessage.gridy = 3;
 
-        mBtnSend = new JButton("Send");
+        JButton btnSend = new JButton("Send");
         GridBagConstraints gbc_btnSend = new GridBagConstraints();
         gbc_btnSend.fill = GridBagConstraints.HORIZONTAL;
         gbc_btnSend.gridx = 3;
         gbc_btnSend.gridy = 3;
 
-        mPanel.setLayout(layout);
-        mPanel.add(scrollHistory, scrollConstraintsHistory);
-        mPanel.add(scrollMessage, scrollConstraintsMessage);
-        mPanel.add(mBtnSend, gbc_btnSend);
+        panel.setLayout(layout);
+        panel.add(scrollHistory, scrollConstraintsHistory);
+        panel.add(scrollMessage, scrollConstraintsMessage);
+        panel.add(btnSend, gbc_btnSend);
 
-        setContentPane(mPanel);
+        setContentPane(panel);
         setVisible(true);
 
         mTxtHistory.setEditable(false);
@@ -170,7 +180,7 @@ class Client extends JFrame {
             }
         });
 
-        mBtnSend.addActionListener(e -> {
+        btnSend.addActionListener(e -> {
             send(mTxtMessage.getText());
         });
     }

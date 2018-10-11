@@ -3,6 +3,7 @@ package com.dilmuratjohn.ichat.server;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,17 +63,37 @@ public class Server implements Runnable {
         receive.start();
     }
 
+    private void send(final byte[] data, InetAddress address, int port) {
+        Thread send = new Thread("send") {
+            public void run() {
+                DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
+                try {
+                    mSocket.send(packet);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        send.start();
+    }
+
+    private void sendToAll(String message) {
+        for (ServerClient client : clients) {
+            send(message.getBytes(), client.getAddress(), client.getPort());
+        }
+    }
+
     private void process(DatagramPacket packet) {
         String message = new String(packet.getData(), packet.getOffset(), packet.getLength());
+        System.out.println(message);
         if (message.startsWith("/c/")) {
             UUID id = UUID.randomUUID();
             clients.add(new ServerClient(message.substring(3), packet.getAddress(), packet.getPort(), id));
-            for (ServerClient client : clients) {
-                System.out.println(client.getName() + "logged in");
-                System.out.println(client.getAddress() + ":" + client.getPort());
-            }
+//            System.out.println(message.substring(3));
+        } else if (message.startsWith("/m/")) {
+            sendToAll(message);
         } else {
-            System.out.println(message);
+//            System.out.println(message);
         }
     }
 }
