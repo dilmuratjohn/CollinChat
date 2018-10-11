@@ -86,6 +86,7 @@ public class Login extends JFrame {
     }
 
     private void login(String name, String address, int port) {
+        if(name.equals("")) name = "anonymous user";
         dispose();
         new Client(name, address, port);
     }

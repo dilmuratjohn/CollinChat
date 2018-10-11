@@ -8,3 +8,4 @@
 > - Ep.6 Grid Bag Layout
 > - Ep.7 Main Client Window
 > - Ep.8 Text History
+> - Ep.9 Action and Key Listener
