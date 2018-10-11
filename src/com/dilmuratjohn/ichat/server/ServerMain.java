@@ -3,18 +3,18 @@ package com.dilmuratjohn.ichat.server;
 public class ServerMain {
 
     private int mPort;
+    private Server mServer;
 
     public ServerMain(int port) {
         mPort = port;
-        System.out.println(port);
+        mServer = new Server(mPort);
     }
 
     public static void main(String[] args) {
-        if (args.length > 1) {
+        if (args.length != 1) {
             System.out.println("Usage: java -jar CollinChatServer.jar [port]");
             return;
         }
-        int port = Integer.parseInt(args[0]);
-        new ServerMain(port);
+        new ServerMain(Integer.parseInt(args[0]));
     }
 }
