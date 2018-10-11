@@ -2,12 +2,8 @@ package com.dilmuratjohn.ichat.server;
 
 public class ServerMain {
 
-    private int mPort;
-    private Server mServer;
-
-    public ServerMain(int port) {
-        mPort = port;
-        mServer = new Server(mPort);
+    private ServerMain(int port) {
+        new Server(port);
     }
 
     public static void main(String[] args) {

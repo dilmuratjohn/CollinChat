@@ -6,16 +6,15 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Server implements Runnable {
 
     private List<ServerClient> clients = new ArrayList<ServerClient>();
 
     private int mPort;
-    private boolean running = false;
     private DatagramSocket mSocket;
-
-    private Thread mThreadRun, mThreadSend, mThreadReceive, mThreadManage;
+    private boolean running = false;
 
     public Server(int port) {
         mPort = port;
@@ -24,8 +23,7 @@ public class Server implements Runnable {
         } catch (SocketException e) {
             e.printStackTrace();
         }
-        mThreadRun = new Thread(this, "server");
-        mThreadRun.start();
+        new Thread(this, "server").start();
     }
 
     public void run() {
@@ -36,18 +34,18 @@ public class Server implements Runnable {
     }
 
     private void manageClients() {
-        mThreadManage = new Thread("manage") {
+        Thread manage = new Thread("manage") {
             public void run() {
                 while (running) {
                     // TODO managing
                 }
             }
         };
-        mThreadManage.start();
+        manage.start();
     }
 
     private void receive() {
-        mThreadReceive = new Thread("receive") {
+        Thread receive = new Thread("receive") {
             public void run() {
                 while (running) {
                     byte[] data = new byte[1024];
@@ -61,14 +59,18 @@ public class Server implements Runnable {
                 }
             }
         };
-        mThreadReceive.start();
+        receive.start();
     }
 
     private void process(DatagramPacket packet) {
         String message = new String(packet.getData(), packet.getOffset(), packet.getLength());
         if (message.startsWith("/c/")) {
-            clients.add(new ServerClient(message.substring(3), packet.getAddress(), packet.getPort(), 0));
-            System.out.println(message.substring(3) + " logged in.");
+            UUID id = UUID.randomUUID();
+            clients.add(new ServerClient(message.substring(3), packet.getAddress(), packet.getPort(), id));
+            for (ServerClient client : clients) {
+                System.out.println(client.getName() + "logged in");
+                System.out.println(client.getAddress() + ":" + client.getPort());
+            }
         } else {
             System.out.println(message);
         }

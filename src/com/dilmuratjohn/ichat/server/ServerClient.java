@@ -1,23 +1,32 @@
 package com.dilmuratjohn.ichat.server;
 
 import java.net.InetAddress;
+import java.util.UUID;
 
-public class ServerClient {
+class ServerClient {
 
-    public String mName;
-    public InetAddress mAddress;
-    public int mPort;
-    private final int mID;
-    public int mAttempt = 0;
+    private String mName;
+    private InetAddress mAddress;
+    private int mPort;
+    private final UUID mID;
+    private int mAttempt = 0;
 
-    public ServerClient(String name, InetAddress address, int port, final int ID){
+    ServerClient(String name, InetAddress address, int port, final UUID ID) {
         mName = name;
         mAddress = address;
         mPort = port;
         mID = ID;
     }
 
-    public int getmID() {
-        return mID;
+    String getName() {
+        return mName;
+    }
+
+    InetAddress getAddress() {
+        return mAddress;
+    }
+
+    int getPort() {
+        return mPort;
     }
 }
