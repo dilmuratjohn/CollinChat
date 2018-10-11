@@ -25,6 +25,7 @@ class Client extends JFrame {
 
     private DatagramSocket mSocket;
     private InetAddress mIP;
+    private Thread send;
 
     Client(String name, String address, int port) {
 
@@ -64,6 +65,21 @@ class Client extends JFrame {
             e.printStackTrace();
         }
         return new String(packet.getData());
+    }
+
+    private void send(final byte[] data){
+        send = new Thread("send"){
+            public void run(){
+                DatagramPacket packet = new DatagramPacket(data, data.length, mIP, mPort);
+                try {
+                    mSocket.send(packet);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        send.start();
+
     }
 
     private void createWindow() {
