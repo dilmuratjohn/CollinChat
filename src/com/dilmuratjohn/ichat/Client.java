@@ -25,27 +25,30 @@ class Client extends JFrame {
 
     private DatagramSocket mSocket;
     private InetAddress mIP;
-    private Thread send;
+    private Thread mThreadSend;
 
     Client(String name, String address, int port) {
 
         mMame = name;
         mAddress = address;
         mPort = port;
-
+        mAddress = "localhost";
+        mPort = 9198;
         createWindow();
 
-        boolean connection = openConnection(mAddress, mPort);
-        if(!connection){
+        boolean connect = openConnection(mAddress);
+        if (!connect) {
             System.err.println("Connection failed." + mAddress + ":" + mPort);
             console("Connection failed.");
-        }else {
+        } else {
             System.out.println("Connection succeed." + mAddress + ":" + mPort);
             console("Attempting a connection to " + mAddress + ":" + mPort + ", user: " + mMame + "...");
+            String connection = mMame + " connected from " + mAddress + ":" + mPort;
+            send(connection.getBytes());
         }
     }
 
-    private boolean openConnection(String address, int port){
+    private boolean openConnection(String address) {
         try {
             mSocket = new DatagramSocket();
             mIP = InetAddress.getByName(address);
@@ -56,7 +59,7 @@ class Client extends JFrame {
         return true;
     }
 
-    private String receive(){
+    private String receive() {
         byte[] data = new byte[1024];
         DatagramPacket packet = new DatagramPacket(data, data.length);
         try {
@@ -67,9 +70,18 @@ class Client extends JFrame {
         return new String(packet.getData());
     }
 
-    private void send(final byte[] data){
-        send = new Thread("send"){
-            public void run(){
+    private void send(String message) {
+        message = message.trim();
+        if (message.equals("")) return;
+        String string = mMame + ": " + message;
+        console(string);
+        send(string.getBytes());
+        mTxtMessage.setText("");
+    }
+
+    private void send(final byte[] data) {
+        mThreadSend = new Thread("send") {
+            public void run() {
                 DatagramPacket packet = new DatagramPacket(data, data.length, mIP, mPort);
                 try {
                     mSocket.send(packet);
@@ -78,8 +90,13 @@ class Client extends JFrame {
                 }
             }
         };
-        send.start();
+        mThreadSend.start();
 
+    }
+
+    private void console(String message) {
+        mTxtHistory.append(message + "\n");
+        mTxtHistory.setCaretPosition(mTxtHistory.getDocument().getLength());
     }
 
     private void createWindow() {
@@ -158,17 +175,5 @@ class Client extends JFrame {
         mBtnSend.addActionListener(e -> {
             send(mTxtMessage.getText());
         });
-    }
-
-    private void send(String message) {
-        message = message.trim();
-        if (message.equals("")) return;
-        console(mMame + ": " + message);
-        mTxtMessage.setText("");
-    }
-
-    private void console(String message) {
-        mTxtHistory.append(message + "\n");
-        mTxtHistory.setCaretPosition(mTxtHistory.getDocument().getLength());
     }
 }
