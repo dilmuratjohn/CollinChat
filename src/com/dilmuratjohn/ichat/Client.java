@@ -6,10 +6,8 @@ import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.io.IOException;
+import java.net.*;
 
 class Client extends JFrame {
 
@@ -20,6 +18,7 @@ class Client extends JFrame {
     private JTextArea mTxtMessage;
     private JButton mBtnSend;
     private DefaultCaret mCaret;
+
     private String mMame;
     private String mAddress;
     private int mPort;
@@ -54,6 +53,17 @@ class Client extends JFrame {
             return false;
         }
         return true;
+    }
+
+    private String receive(){
+        byte[] data = new byte[1024];
+        DatagramPacket packet = new DatagramPacket(data, data.length);
+        try {
+            mSocket.receive(packet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new String(packet.getData());
     }
 
     private void createWindow() {
