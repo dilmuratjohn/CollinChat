@@ -16,3 +16,4 @@
 > - Ep.14 Server Threads and Explanations
 > - Ep.15 Server Packet Receiving
 > - Ep.16 Multiple Clients
+> - Ep.17 Connection Packets

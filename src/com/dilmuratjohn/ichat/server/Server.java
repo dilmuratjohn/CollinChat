@@ -30,7 +30,7 @@ public class Server implements Runnable {
 
     public void run() {
         running = true;
-        System.out.println("Server listening on port " + mPort + "...");
+        System.out.println("Server listening on port [" + mPort + "] ...");
         manageClients();
         receive();
     }
@@ -57,15 +57,20 @@ public class Server implements Runnable {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    String message = new String(packet.getData(), packet.getOffset(), packet.getLength());
-                    clients.add(new ServerClient("Collin", packet.getAddress(), packet.getPort(), 0));
-                    for(ServerClient client: clients){
-                        System.out.println(client.mAddress + ":" + client.mPort);
-                    }
-                    System.out.println(message);
+                    process(packet);
                 }
             }
         };
         mThreadReceive.start();
+    }
+
+    private void process(DatagramPacket packet) {
+        String message = new String(packet.getData(), packet.getOffset(), packet.getLength());
+        if (message.startsWith("/c/")) {
+            clients.add(new ServerClient(message.substring(3), packet.getAddress(), packet.getPort(), 0));
+            System.out.println(message.substring(3) + " logged in.");
+        } else {
+            System.out.println(message);
+        }
     }
 }

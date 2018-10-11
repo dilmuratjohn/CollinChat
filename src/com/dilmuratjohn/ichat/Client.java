@@ -41,7 +41,7 @@ class Client extends JFrame {
         } else {
             System.out.println("Connection succeed." + mAddress + ":" + mPort);
             console("Attempting a connection to " + mAddress + ":" + mPort + ", user: " + mMame + "...");
-            String connection = mMame + " connected from " + mAddress + ":" + mPort;
+            String connection = "/c/"  + mMame;
             send(connection.getBytes());
         }
     }
