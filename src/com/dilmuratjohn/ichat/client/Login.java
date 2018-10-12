@@ -1,4 +1,4 @@
-package com.dilmuratjohn.ichat;
+package com.dilmuratjohn.ichat.client;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

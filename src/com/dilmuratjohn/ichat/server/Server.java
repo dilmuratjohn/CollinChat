@@ -65,12 +65,15 @@ public class Server implements Runnable {
                     sendToAll(Globals.Prefix.PING.toString());
                     try {
                         sleep(2000);
+                        String userList = "";
                         for (int i = 0; i < clients.size(); i++) {
                             if (clients.get(i).getAttempt() > MAX_ATTEMPTS)
                                 disconnect(clients.get(i).getId(), Globals.Status.TIMEOUT);
                             else
                                 clients.get(i).increaseAttempt();
+                            userList = userList.concat(Globals.Prefix.ONLINE_USER.toString() + clients.get(i).getName());
                         }
+                        sendToAll(userList);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

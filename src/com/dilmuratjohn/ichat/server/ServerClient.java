@@ -45,6 +45,4 @@ class ServerClient {
     int getAttempt() {
         return this.attempt;
     }
-
-
 }

@@ -33,6 +33,12 @@ public class Globals {
                 return "/k/";
             }
         },
+
+        ONLINE_USER {
+            public String toString() {
+                return "/u/";
+            }
+        },
     }
 
     public enum Status {

@@ -1,4 +1,4 @@
-package com.dilmuratjohn.ichat;
+package com.dilmuratjohn.ichat.client;
 
 import java.io.IOException;
 import java.net.*;
@@ -23,6 +23,10 @@ class Client {
 
     String getId() {
         return this.id;
+    }
+
+    int getPort() {
+        return this.port;
     }
 
     void setId(String id) {

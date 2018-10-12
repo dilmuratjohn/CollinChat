@@ -1,14 +1,14 @@
-package com.dilmuratjohn.ichat;
+package com.dilmuratjohn.ichat.client;
+
+import com.dilmuratjohn.ichat.Globals;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 class ClientView extends JFrame {
@@ -18,25 +18,31 @@ class ClientView extends JFrame {
     private Client client;
     private JTextArea JTMessage;
     private JTextArea JTHistory;
+    private OnlineUsers onlineUsers;
+
+    private final String address;
 
     ClientView(final String name, final String address, final int port) {
-
+        this.address = address;
         createView();
+        this.client = new Client(name, port);
+        init();
+    }
 
-        client = new Client(name, port);
-
-        boolean connect = client.openConnection(address);
+    private void init() {
+        boolean connect = client.openConnection(this.address);
         if (!connect) {
             running = false;
-            System.err.println("Connection failed." + address + ":" + port);
+            System.err.println("Connection failed." + address + ":" + client.getPort());
             console("Connection failed.");
         } else {
             running = true;
-            System.out.println("Connection succeed." + address + ":" + port);
-            console("Attempting a connection to " + address + ":" + port + ", user: " + name + "...");
-            String connection = Globals.Prefix.CONNECTION + name;
+            System.out.println("Connection succeed." + address + ":" + client.getPort());
+            console("Attempting a connection to " + address + ":" + client.getPort() + ", user: " + client.getName() + "...");
+            String connection = Globals.Prefix.CONNECTION + client.getName();
             client.send(connection);
             receive();
+            this.onlineUsers = new OnlineUsers();
         }
     }
 
@@ -56,13 +62,28 @@ class ClientView extends JFrame {
         JPanel panel = new JPanel();
         panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
+        JMenuBar JMBar = new JMenuBar();
+        setJMenuBar(JMBar);
+
+        JMenu JMFile = new JMenu("File");
+        JMBar.add(JMFile);
+
+        JMenuItem JMIOnlineUser = new JMenuItem("Online User");
+        JMenuItem JMIExit = new JMenuItem("Exit");
+        JMFile.add(JMIOnlineUser);
+        JMFile.add(JMIExit);
+
         GridBagLayout layout = new GridBagLayout();
         layout.columnWidths = new int[]{55, 670, 15, 25, 15};
-        layout.rowHeights = new int[]{30, 590, 15, 30, 15};
+        layout.rowHeights = new int[]{50, 570, 15, 30, 15};
         layout.columnWeights = new double[]{1.0, Double.MIN_VALUE};
         layout.rowWeights = new double[]{1.0, Double.MIN_VALUE};
 
         JTHistory = new JTextArea();
+        JTHistory.setEditable(false);
+        JTHistory.setFont(new Font("Serif", Font.ITALIC, 17));
+        JTHistory.setLineWrap(true);
+        JTHistory.setWrapStyleWord(true);
         DefaultCaret caret = (DefaultCaret) JTHistory.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         JScrollPane JSPHistory = new JScrollPane(JTHistory);
@@ -73,6 +94,9 @@ class ClientView extends JFrame {
         GBCHistory.gridwidth = 3;
 
         JTMessage = new JTextArea();
+        JTMessage.setFont(new Font("Serif", Font.ITALIC, 17));
+        JTMessage.setLineWrap(true);
+        JTMessage.setWrapStyleWord(true);
         JScrollPane JSPMessage = new JScrollPane(JTMessage, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         GridBagConstraints GBCMessage = new GridBagConstraints();
         GBCMessage.insets = new Insets(5, 0, 5, 0);
@@ -92,27 +116,22 @@ class ClientView extends JFrame {
         panel.add(JBSend, GBCSend);
 
         setContentPane(panel);
-
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                client.send(Globals.Prefix.DISCONNECTION + client.getId());
-                client.close();
-                running = false;
-            }
-        });
-
         setVisible(true);
 
-        JTHistory.setEditable(false);
-        JTHistory.setFont(new Font("Serif", Font.ITALIC, 17));
-        JTHistory.setLineWrap(true);
-        JTHistory.setWrapStyleWord(true);
-
         JTMessage.requestFocusInWindow();
-        JTMessage.setFont(new Font("Serif", Font.ITALIC, 17));
-        JTMessage.setLineWrap(true);
-        JTMessage.setWrapStyleWord(true);
+
+        JMIOnlineUser.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                onlineUsers.setVisible(true);
+            }
+        });
+        JMIExit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
         JTMessage.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -121,9 +140,18 @@ class ClientView extends JFrame {
                 }
             }
         });
-
         JBSend.addActionListener(e -> {
             send(JTMessage.getText());
+        });
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (running) {
+                    client.send(Globals.Prefix.DISCONNECTION + client.getId());
+                    client.close();
+                }
+                running = false;
+            }
         });
     }
 
@@ -154,6 +182,9 @@ class ClientView extends JFrame {
                 } else if (message.startsWith(Globals.Prefix.KICKED.toString())) {
                     console("You are kicked by root.");
                     running = false;
+                } else if (message.startsWith(Globals.Prefix.ONLINE_USER.toString())) {
+                    String[] userList = message.split(Globals.Prefix.ONLINE_USER.toString());
+                    this.onlineUsers.update(Arrays.copyOfRange(userList, 1, userList.length));
                 } else {
                     System.out.println(message);
                     console(message.substring(Globals.Prefix.MESSAGE.toString().length()));
