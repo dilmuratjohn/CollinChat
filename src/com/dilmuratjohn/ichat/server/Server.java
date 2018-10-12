@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.UUID;
 
 public class Server implements Runnable {
@@ -19,6 +20,7 @@ public class Server implements Runnable {
     private final int MAX_ATTEMPTS = 5;
     private final int port;
     private boolean running = false;
+    private boolean raw = false;
 
     public Server(final int port) {
         this.port = port;
@@ -35,6 +37,25 @@ public class Server implements Runnable {
         System.out.println("Server listening on port [" + port + "] ...");
         manageClients();
         receive();
+        Scanner scanner = new Scanner(System.in);
+        while (running) {
+            String command = scanner.nextLine();
+            if (command.equals("/end all.")) {
+                System.exit(-1);
+            }
+            if (command.equals("/clients")) {
+                System.out.println("total: " + clients.size());
+                for (ServerClient client : clients) {
+                    System.out.println("> [" + client.getName() + "] (" + client.getAddress() + ":" + client.getPort() + ") {" + client.getId() + "}");
+                }
+            }
+            if (command.equals("/raw")) {
+                this.raw = !raw;
+            }
+            if (command.startsWith("/m/")) {
+                sendToAll(command);
+            }
+        }
     }
 
     private void manageClients() {
@@ -79,6 +100,7 @@ public class Server implements Runnable {
 
     private void process(final DatagramPacket packet) {
         String message = new String(packet.getData(), packet.getOffset(), packet.getLength());
+        if (raw) System.out.println(message);
         if (message.startsWith(Prefix.CONNECTION.toString())) {
             UUID id = UUID.randomUUID();
             clients.add(new ServerClient(message.substring(Prefix.CONNECTION.toString().length()), packet.getAddress(), packet.getPort(), id));
@@ -86,7 +108,6 @@ public class Server implements Runnable {
             message = Prefix.CONNECTION.toString() + id;
             send(message.getBytes(), packet.getAddress(), packet.getPort());
         } else if (message.startsWith(Prefix.MESSAGE.toString())) {
-            System.out.println(packet.getAddress() + ":" + packet.getPort());
             sendToAll(message);
         } else if (message.startsWith(Prefix.DISCONNECTION.toString())) {
             disconnect(message.substring(Prefix.DISCONNECTION.toString().length()), false);
@@ -125,6 +146,7 @@ public class Server implements Runnable {
     }
 
     private void sendToAll(String message) {
+        if (raw) System.out.println(message);
         for (ServerClient client : clients) {
             send(message.getBytes(), client.getAddress(), client.getPort());
         }
