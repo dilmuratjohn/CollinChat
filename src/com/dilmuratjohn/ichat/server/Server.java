@@ -1,5 +1,7 @@
 package com.dilmuratjohn.ichat.server;
 
+import com.dilmuratjohn.ichat.Prefix;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -13,11 +15,13 @@ public class Server implements Runnable {
 
     private List<ServerClient> clients = new ArrayList<ServerClient>();
 
+    private final int MAX_BYTES = 1024;
+
     private int mPort;
     private DatagramSocket mSocket;
     private boolean running = false;
 
-    public Server(int port) {
+    public Server(final int port) {
         mPort = port;
         try {
             mSocket = new DatagramSocket(mPort);
@@ -49,7 +53,7 @@ public class Server implements Runnable {
         Thread receive = new Thread("receive") {
             public void run() {
                 while (running) {
-                    byte[] data = new byte[1024];
+                    byte[] data = new byte[MAX_BYTES];
                     DatagramPacket packet = new DatagramPacket(data, data.length);
                     try {
                         mSocket.receive(packet);
@@ -63,23 +67,23 @@ public class Server implements Runnable {
         receive.start();
     }
 
-    private void process(DatagramPacket packet) {
+    private void process(final DatagramPacket packet) {
         String message = new String(packet.getData(), packet.getOffset(), packet.getLength());
-        if (message.startsWith("/c/")) {
+        if (message.startsWith(Prefix.CONNECTION.toString())) {
             UUID id = UUID.randomUUID();
-            clients.add(new ServerClient(message.substring(3), packet.getAddress(), packet.getPort(), id));
-            System.out.println(message.substring(3));
-            String data = "/c/" + id;
+            clients.add(new ServerClient(message.substring(Prefix.CONNECTION.toString().length()), packet.getAddress(), packet.getPort(), id));
+            System.out.println(message.substring(Prefix.CONNECTION.toString().length()));
+            String data = Prefix.CONNECTION.toString() + id;
             send(data.getBytes(), packet.getAddress(), packet.getPort());
-        } else if (message.startsWith("/m/")) {
+        } else if (message.startsWith(Prefix.MESSAGE.toString())) {
             System.out.println(packet.getAddress() + ":" + packet.getPort());
-            sendToAll(message.substring(3));
+            sendToAll(message);
         } else {
             System.out.println(message);
         }
     }
 
-    private void send(final byte[] data, InetAddress address, int port) {
+    private void send(final byte[] data, final InetAddress address, final int port) {
         Thread send = new Thread("send") {
             public void run() {
                 DatagramPacket packet = new DatagramPacket(data, data.length, address, port);

@@ -10,6 +10,7 @@ class Client {
     private InetAddress ip;
     private int port;
     private String id;
+    private final int MAX_BYTES = 1024;
 
     Client(String name, String address, int port) {
         this.name = name;
@@ -29,6 +30,10 @@ class Client {
         return ip;
     }
 
+    void setID(String id) {
+        this.id = id;
+    }
+
     boolean openConnection(String address) {
         try {
             socket = new DatagramSocket();
@@ -41,24 +46,18 @@ class Client {
     }
 
     String receive() {
-        byte[] data = new byte[1024];
+        byte[] data = new byte[MAX_BYTES];
         DatagramPacket packet = new DatagramPacket(data, data.length);
         try {
             socket.receive(packet);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String string = new String(packet.getData(), packet.getOffset(), packet.getLength());
-        if (string.startsWith("/c/")) {
-            id = string.substring(3);
-            return "connection succeed.";
-        } else {
-            return string;
-        }
+        return new String(packet.getData(), packet.getOffset(), packet.getLength());
     }
 
-    void send(final byte[] data) {
-        DatagramPacket packet = new DatagramPacket(data, data.length, ip, port);
+    void send(final String data) {
+        DatagramPacket packet = new DatagramPacket(data.getBytes(), data.getBytes().length, ip, port);
         try {
             socket.send(packet);
         } catch (IOException e) {

@@ -6,6 +6,8 @@ import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 class ClientView extends JFrame {
 
@@ -18,7 +20,7 @@ class ClientView extends JFrame {
 
     private boolean running = false;
 
-    ClientView(String name, String address, int port) {
+    ClientView(final String name, final String address, final int port) {
 
         client = new Client(name, address, port);
         createView();
@@ -32,8 +34,8 @@ class ClientView extends JFrame {
             running = true;
             System.out.println("Connection succeed." + address + ":" + port);
             console("Attempting a connection to " + address + ":" + port + ", user: " + name + "...");
-            String connection = "/c/" + name;
-            client.send(connection.getBytes());
+            String connection = Prefix.CONNECTION + name;
+            client.send(connection);
             receive();
         }
 
@@ -119,25 +121,35 @@ class ClientView extends JFrame {
     private void send(String data) {
         data = data.trim();
         if (data.equals("")) return;
-        data = client.getName() + ": " + data;
-        console(data);
-        data = "/m/" + data;
-        client.send(data.getBytes());
-        message.setText("");
-    }
 
-    private void console(String message) {
-        history.append(message + "\n");
-        history.setCaretPosition(history.getDocument().getLength());
+        data = Prefix.MESSAGE +
+                new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) +
+                "   " +
+                client.getName() +
+                ": \n" +
+                data;
+        client.send(data);
+        message.setText("");
     }
 
     private void receive() {
         new Thread(() -> {
             while (running) {
                 String data = client.receive();
-                console(data);
+                if (data.startsWith(Prefix.CONNECTION.toString())) {
+                    client.setID(data.substring(Prefix.CONNECTION.toString().length()));
+                    console("connection succeed.\n");
+                } else {
+                    System.out.println(data);
+                    console(data.substring(Prefix.MESSAGE.toString().length()));
+                }
             }
         }).start();
+    }
+
+    private void console(String message) {
+        history.append(message + "\n");
+        history.setCaretPosition(history.getDocument().getLength());
     }
 }
 
