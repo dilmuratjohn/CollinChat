@@ -6,16 +6,14 @@ import java.net.*;
 class Client {
 
     private final int MAX_RECEIVE_BYTES = 1024;
-
     private DatagramSocket socket;
-    private String name, address;
     private InetAddress ip;
-    private int port;
+    private final String name;
+    private final int port;
     private String id;
 
-    Client(String name, String address, int port) {
+    Client(String name, int port) {
         this.name = name;
-        this.address = address;
         this.port = port;
     }
 
@@ -23,15 +21,11 @@ class Client {
         return name;
     }
 
-    String getAddress() {
-        return address;
+    String getId() {
+        return this.id;
     }
 
-    InetAddress getIP() {
-        return ip;
-    }
-
-    void setID(String id) {
+    void setId(String id) {
         this.id = id;
     }
 
@@ -53,7 +47,7 @@ class Client {
             socket.receive(packet);
         } catch (IOException e) {
             e.printStackTrace();
-            return "connection err.";
+            return "Connection error.\n";
         }
         return new String(packet.getData(), packet.getOffset(), packet.getLength());
     }
@@ -65,5 +59,11 @@ class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    void close() {
+        new Thread(() -> {
+            socket.close();
+        }).start();
     }
 }

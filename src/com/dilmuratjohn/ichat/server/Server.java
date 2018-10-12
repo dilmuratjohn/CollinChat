@@ -14,17 +14,15 @@ import java.util.UUID;
 public class Server implements Runnable {
 
     private List<ServerClient> clients = new ArrayList<ServerClient>();
-
+    private DatagramSocket socket;
     private final int MAX_RECEIVE_BYTES = 1024;
-
-    private int mPort;
-    private DatagramSocket mSocket;
+    private final int port;
     private boolean running = false;
 
     public Server(final int port) {
-        mPort = port;
+        this.port = port;
         try {
-            mSocket = new DatagramSocket(mPort);
+            socket = new DatagramSocket(this.port);
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -33,7 +31,7 @@ public class Server implements Runnable {
 
     public void run() {
         running = true;
-        System.out.println("Server listening on port [" + mPort + "] ...");
+        System.out.println("Server listening on port [" + port + "] ...");
         manageClients();
         receive();
     }
@@ -42,7 +40,12 @@ public class Server implements Runnable {
         Thread manage = new Thread("manage") {
             public void run() {
                 while (running) {
-                    // TODO managing
+                    try {
+                        sleep(5000);
+                        System.out.println("current client total: " + clients.size());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         };
@@ -56,7 +59,7 @@ public class Server implements Runnable {
                     byte[] data = new byte[MAX_RECEIVE_BYTES];
                     DatagramPacket packet = new DatagramPacket(data, data.length);
                     try {
-                        mSocket.receive(packet);
+                        socket.receive(packet);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -72,14 +75,29 @@ public class Server implements Runnable {
         if (message.startsWith(Prefix.CONNECTION.toString())) {
             UUID id = UUID.randomUUID();
             clients.add(new ServerClient(message.substring(Prefix.CONNECTION.toString().length()), packet.getAddress(), packet.getPort(), id));
-            System.out.println(message.substring(Prefix.CONNECTION.toString().length()));
-            String data = Prefix.CONNECTION.toString() + id;
-            send(data.getBytes(), packet.getAddress(), packet.getPort());
+            System.out.println("[" + message.substring(Prefix.CONNECTION.toString().length()) + "] in");
+            message = Prefix.CONNECTION.toString() + id;
+            send(message.getBytes(), packet.getAddress(), packet.getPort());
         } else if (message.startsWith(Prefix.MESSAGE.toString())) {
             System.out.println(packet.getAddress() + ":" + packet.getPort());
             sendToAll(message);
+        } else if (message.startsWith(Prefix.DISCONNECTION.toString())) {
+            disconnect(message.substring(Prefix.DISCONNECTION.toString().length()), false);
         } else {
             System.out.println(message);
+        }
+    }
+
+    private void disconnect(String data, boolean timeOut) {
+        for (ServerClient client : clients) {
+            if (client.getId().equals(data)) {
+                clients.remove(client);
+                if (timeOut)
+                    System.out.println("[" + client.getName() + "] times out");
+                else
+                    System.out.println("[" + client.getName() + "] left");
+                break;
+            }
         }
     }
 
@@ -88,7 +106,7 @@ public class Server implements Runnable {
             public void run() {
                 DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
                 try {
-                    mSocket.send(packet);
+                    socket.send(packet);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

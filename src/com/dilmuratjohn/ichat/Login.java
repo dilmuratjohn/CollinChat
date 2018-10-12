@@ -9,22 +9,14 @@ import java.awt.event.ActionListener;
 public class Login extends JFrame {
 
     private static final long serialVersionUID = 1L;
-
-    private JPanel mPanel;
-    private JTextField mTxtName;
-    private JTextField mTxtAddress;
-    private JTextField mTxtPort;
-    private JLabel mLblName;
-    private JLabel mLblAddress;
-    private JLabel mLblPort;
-    private JLabel mLblWarning;
-    private JButton mBtnLogin;
+    private JTextField JTName;
+    private JTextField JTAddress;
+    private JTextField JTPort;
+    private JLabel JLWarning;
 
     public Login() {
-
         createPanel();
     }
-
 
     private void createPanel() {
 
@@ -40,57 +32,57 @@ public class Login extends JFrame {
         setSize(300, 400);
         setLocationRelativeTo(null);
 
-        mPanel = new JPanel();
-        mPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-        mPanel.setLayout(null);
+        JPanel panel = new JPanel();
+        panel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        panel.setLayout(null);
 
-        mTxtName = new JTextField();
-        mTxtName.setBounds(125, 50, 150, 30);
-        mTxtName.setColumns(10);
+        JTName = new JTextField();
+        JTName.setBounds(125, 50, 150, 30);
+        JTName.setColumns(10);
 
-        mTxtAddress = new JTextField();
-        mTxtAddress.setBounds(125, 100, 150, 30);
-        mTxtAddress.setColumns(10);
+        JTAddress = new JTextField();
+        JTAddress.setBounds(125, 100, 150, 30);
+        JTAddress.setColumns(10);
 
-        mTxtPort = new JTextField();
-        mTxtPort.setBounds(125, 150, 150, 30);
-        mTxtPort.setColumns(10);
+        JTPort = new JTextField();
+        JTPort.setBounds(125, 150, 150, 30);
+        JTPort.setColumns(10);
 
-        mLblName = new JLabel("Name:");
-        mLblName.setBounds(30, 50, 70, 30);
+        JLabel JLName = new JLabel("Name:");
+        JLName.setBounds(30, 50, 70, 30);
 
-        mLblAddress = new JLabel("IP Address:");
-        mLblAddress.setBounds(30, 100, 70, 30);
+        JLabel JLAddress = new JLabel("IP Address:");
+        JLAddress.setBounds(30, 100, 70, 30);
 
-        mLblPort = new JLabel("Port:");
-        mLblPort.setBounds(30, 150, 70, 30);
+        JLabel JLPort = new JLabel("Port:");
+        JLPort.setBounds(30, 150, 70, 30);
 
-        mLblWarning = new JLabel();
-        mLblWarning.setBounds(100, 270, 100, 30);
-        mLblWarning.setForeground(Color.RED);
+        JLWarning = new JLabel();
+        JLWarning.setBounds(100, 270, 100, 30);
+        JLWarning.setForeground(Color.RED);
 
-        mBtnLogin = new JButton("Login");
-        mBtnLogin.setBounds(100, 300, 100, 30);
-        mBtnLogin.addActionListener(new ActionListener() {
+        JButton JBLogin = new JButton("Login");
+        JBLogin.setBounds(100, 300, 100, 30);
+        JBLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String name = mTxtName.getText();
-                String address = mTxtAddress.getText();
-                String port = (mTxtPort.getText());
+                String name = JTName.getText();
+                String address = JTAddress.getText();
+                String port = (JTPort.getText());
                 login(name, address, port);
             }
         });
 
-        mPanel.add(mTxtName);
-        mPanel.add(mTxtAddress);
-        mPanel.add(mTxtPort);
-        mPanel.add(mLblName);
-        mPanel.add(mLblAddress);
-        mPanel.add(mLblPort);
-        mPanel.add(mLblWarning);
-        mPanel.add(mBtnLogin);
+        panel.add(JTName);
+        panel.add(JTAddress);
+        panel.add(JTPort);
+        panel.add(JLName);
+        panel.add(JLAddress);
+        panel.add(JLPort);
+        panel.add(JLWarning);
+        panel.add(JBLogin);
 
-        setContentPane(mPanel);
+        setContentPane(panel);
     }
 
     private void login(String name, String address, String port) {
@@ -98,11 +90,11 @@ public class Login extends JFrame {
             name = "anonymous user";
         }
         if (address.equals("")) {
-            mLblWarning.setText(" empty address");
+            JLWarning.setText(" empty address");
             return;
         }
         if (port.equals("")) {
-            mLblWarning.setText("   empty port");
+            JLWarning.setText("   empty port");
             return;
         }
 
@@ -111,21 +103,17 @@ public class Login extends JFrame {
             new ClientView(name, address, iPort);
             dispose();
         } catch (Exception e) {
-            mLblWarning.setText("   wrong port");
+            e.printStackTrace();
         }
-
     }
 
     public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Login frame = new Login();
-                    frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        EventQueue.invokeLater(() -> {
+            try {
+                Login frame = new Login();
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }

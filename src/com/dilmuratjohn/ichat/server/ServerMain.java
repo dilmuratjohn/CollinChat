@@ -8,7 +8,7 @@ public class ServerMain {
 
     public static void main(String[] args) {
         if (args.length != 1) {
-            System.out.println("Usage: java -jar CollinChatServer.jar [port]");
+            System.out.println("Usage: java -jar Server.jar [port]");
             return;
         }
         new ServerMain(Integer.parseInt(args[0]));

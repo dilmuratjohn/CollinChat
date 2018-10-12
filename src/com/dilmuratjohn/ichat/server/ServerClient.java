@@ -5,28 +5,40 @@ import java.util.UUID;
 
 class ServerClient {
 
-    private String mName;
-    private InetAddress mAddress;
-    private int mPort;
-    private final UUID mID;
-    private int mAttempt = 0;
+    private final String name;
+    private final InetAddress address;
+    private final int port;
+    private final String id;
+    private int attempt = 0;
 
-    ServerClient(String name, InetAddress address, int port, final UUID ID) {
-        mName = name;
-        mAddress = address;
-        mPort = port;
-        mID = ID;
+    ServerClient(String name, InetAddress address, int port, final UUID id) {
+        this.name = name;
+        this.address = address;
+        this.port = port;
+        this.id = id.toString();
     }
 
     String getName() {
-        return mName;
+        return this.name;
+    }
+
+    String getId() {
+        return this.id;
     }
 
     InetAddress getAddress() {
-        return mAddress;
+        return this.address;
     }
 
     int getPort() {
-        return mPort;
+        return this.port;
+    }
+
+    void increaseAttempt() {
+        ++this.attempt;
+    }
+
+    int getAttempt() {
+        return this.attempt;
     }
 }

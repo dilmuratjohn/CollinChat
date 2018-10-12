@@ -6,24 +6,24 @@ import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 class ClientView extends JFrame {
 
-    private Client client;
-
     private static final long serialVersionUID = 1L;
-
-    private JTextArea history;
-    private JTextArea message;
-
-    private boolean running = false;
+    private boolean running;
+    private Client client;
+    private JTextArea JTMessage;
+    private JTextArea JTHistory;
 
     ClientView(final String name, final String address, final int port) {
 
-        client = new Client(name, address, port);
         createView();
+
+        client = new Client(name, port);
 
         boolean connect = client.openConnection(address);
         if (!connect) {
@@ -38,7 +38,6 @@ class ClientView extends JFrame {
             client.send(connection);
             receive();
         }
-
     }
 
     private void createView() {
@@ -63,93 +62,104 @@ class ClientView extends JFrame {
         layout.columnWeights = new double[]{1.0, Double.MIN_VALUE};
         layout.rowWeights = new double[]{1.0, Double.MIN_VALUE};
 
-        history = new JTextArea();
-        DefaultCaret caret = (DefaultCaret) history.getCaret();
+        JTHistory = new JTextArea();
+        DefaultCaret caret = (DefaultCaret) JTHistory.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-        JScrollPane paneHistory = new JScrollPane(history);
-        GridBagConstraints gbc_history = new GridBagConstraints();
-        gbc_history.fill = GridBagConstraints.BOTH;
-        gbc_history.gridx = 1;
-        gbc_history.gridy = 1;
-        gbc_history.gridwidth = 3;
+        JScrollPane JSPHistory = new JScrollPane(JTHistory);
+        GridBagConstraints GBCHistory = new GridBagConstraints();
+        GBCHistory.fill = GridBagConstraints.BOTH;
+        GBCHistory.gridx = 1;
+        GBCHistory.gridy = 1;
+        GBCHistory.gridwidth = 3;
 
-        message = new JTextArea();
-        JScrollPane paneMessage = new JScrollPane(message, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        GridBagConstraints gbc_message = new GridBagConstraints();
-        gbc_message.insets = new Insets(5, 0, 5, 0);
-        gbc_message.fill = GridBagConstraints.BOTH;
-        gbc_message.gridx = 1;
-        gbc_message.gridy = 3;
+        JTMessage = new JTextArea();
+        JScrollPane JSPMessage = new JScrollPane(JTMessage, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        GridBagConstraints GBCMessage = new GridBagConstraints();
+        GBCMessage.insets = new Insets(5, 0, 5, 0);
+        GBCMessage.fill = GridBagConstraints.BOTH;
+        GBCMessage.gridx = 1;
+        GBCMessage.gridy = 3;
 
-        JButton send = new JButton("Send");
-        GridBagConstraints gbc_send = new GridBagConstraints();
-        gbc_send.fill = GridBagConstraints.HORIZONTAL;
-        gbc_send.gridx = 3;
-        gbc_send.gridy = 3;
+        JButton JBSend = new JButton("Send");
+        GridBagConstraints GBCSend = new GridBagConstraints();
+        GBCSend.fill = GridBagConstraints.HORIZONTAL;
+        GBCSend.gridx = 3;
+        GBCSend.gridy = 3;
 
         panel.setLayout(layout);
-        panel.add(paneHistory, gbc_history);
-        panel.add(paneMessage, gbc_message);
-        panel.add(send, gbc_send);
+        panel.add(JSPHistory, GBCHistory);
+        panel.add(JSPMessage, GBCMessage);
+        panel.add(JBSend, GBCSend);
 
         setContentPane(panel);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                client.send(Prefix.DISCONNECTION + client.getId());
+                client.close();
+                running = false;
+            }
+        });
+
         setVisible(true);
 
-        history.setEditable(false);
-        history.setFont(new Font("Serif", Font.ITALIC, 17));
-        history.setLineWrap(true);
-        history.setWrapStyleWord(true);
+        JTHistory.setEditable(false);
+        JTHistory.setFont(new Font("Serif", Font.ITALIC, 17));
+        JTHistory.setLineWrap(true);
+        JTHistory.setWrapStyleWord(true);
 
-        message.requestFocusInWindow();
-        message.setFont(new Font("Serif", Font.ITALIC, 17));
-        message.setLineWrap(true);
-        message.setWrapStyleWord(true);
-        message.addKeyListener(new KeyAdapter() {
+        JTMessage.requestFocusInWindow();
+        JTMessage.setFont(new Font("Serif", Font.ITALIC, 17));
+        JTMessage.setLineWrap(true);
+        JTMessage.setWrapStyleWord(true);
+        JTMessage.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    send(message.getText());
+                    send(JTMessage.getText());
                 }
             }
         });
 
-        send.addActionListener(e -> {
-            send(message.getText());
+        JBSend.addActionListener(e -> {
+            send(JTMessage.getText());
         });
     }
 
-    private void send(String data) {
-        data = data.trim();
-        if (data.equals("")) return;
+    private void send(String message) {
+        message = message.trim();
+        if (message.equals("")) return;
 
-        data = Prefix.MESSAGE +
+        message = Prefix.MESSAGE +
                 new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) +
                 "   " +
                 client.getName() +
                 ": \n" +
-                data;
-        client.send(data);
-        message.setText("");
+                message;
+        System.out.println(message);
+        client.send(message);
+        JTMessage.setText("");
     }
 
     private void receive() {
         new Thread(() -> {
             while (running) {
-                String data = client.receive();
-                if (data.startsWith(Prefix.CONNECTION.toString())) {
-                    client.setID(data.substring(Prefix.CONNECTION.toString().length()));
-                    console("connection succeed.\n");
+                String message = client.receive();
+                if (message.startsWith(Prefix.CONNECTION.toString())) {
+                    client.setId(message.substring(Prefix.CONNECTION.toString().length()));
+                    console("Connection succeed.\n");
                 } else {
-                    System.out.println(data);
-                    console(data.substring(Prefix.MESSAGE.toString().length()));
+                    System.out.println(message);
+                    console(message.substring(Prefix.MESSAGE.toString().length()));
                 }
             }
         }).start();
     }
 
     private void console(String message) {
-        history.append(message + "\n");
-        history.setCaretPosition(history.getDocument().getLength());
+        JTHistory.append(message + "\n");
+        JTHistory.setCaretPosition(JTHistory.getDocument().getLength());
     }
 }
 

@@ -7,6 +7,12 @@ public enum Prefix {
         }
     },
 
+    DISCONNECTION {
+        public String toString() {
+            return "/d/";
+        }
+    },
+
     MESSAGE {
         public String toString() {
             return "/m/";
