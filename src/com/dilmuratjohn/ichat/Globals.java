@@ -58,7 +58,7 @@ public class Globals {
 
     public enum Command {
 
-        COMMAND{
+        COMMAND {
             public String toString() {
                 return "/";
             }
