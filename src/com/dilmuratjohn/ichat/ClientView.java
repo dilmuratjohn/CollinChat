@@ -34,7 +34,7 @@ class ClientView extends JFrame {
             console("Attempting a connection to " + address + ":" + port + ", user: " + name + "...");
             String connection = "/c/" + name;
             client.send(connection.getBytes());
-            client.receive();
+            receive();
         }
 
     }
@@ -50,7 +50,7 @@ class ClientView extends JFrame {
         setSize(800, 700);
         setLocationRelativeTo(null);
         setResizable(false);
-        setTitle("Collin Chat Client");
+        setTitle("iChat");
 
         JPanel panel = new JPanel();
         panel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -129,6 +129,15 @@ class ClientView extends JFrame {
     private void console(String message) {
         history.append(message + "\n");
         history.setCaretPosition(history.getDocument().getLength());
+    }
+
+    private void receive() {
+        new Thread(() -> {
+            while (running) {
+                String data = client.receive();
+                console(data);
+            }
+        }).start();
     }
 }
 

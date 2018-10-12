@@ -63,6 +63,22 @@ public class Server implements Runnable {
         receive.start();
     }
 
+    private void process(DatagramPacket packet) {
+        String message = new String(packet.getData(), packet.getOffset(), packet.getLength());
+        if (message.startsWith("/c/")) {
+            UUID id = UUID.randomUUID();
+            clients.add(new ServerClient(message.substring(3), packet.getAddress(), packet.getPort(), id));
+            System.out.println(message.substring(3));
+            String data = "/c/" + id;
+            send(data.getBytes(), packet.getAddress(), packet.getPort());
+        } else if (message.startsWith("/m/")) {
+            System.out.println(packet.getAddress() + ":" + packet.getPort());
+            sendToAll(message.substring(3));
+        } else {
+            System.out.println(message);
+        }
+    }
+
     private void send(final byte[] data, InetAddress address, int port) {
         Thread send = new Thread("send") {
             public void run() {
@@ -80,20 +96,6 @@ public class Server implements Runnable {
     private void sendToAll(String message) {
         for (ServerClient client : clients) {
             send(message.getBytes(), client.getAddress(), client.getPort());
-        }
-    }
-
-    private void process(DatagramPacket packet) {
-        String message = new String(packet.getData(), packet.getOffset(), packet.getLength());
-        if (message.startsWith("/c/")) {
-            UUID id = UUID.randomUUID();
-            clients.add(new ServerClient(message.substring(3), packet.getAddress(), packet.getPort(), id));
-            System.out.println(message.substring(3));
-        } else if (message.startsWith("/m/")) {
-            System.out.println(packet.getAddress() + ":" + packet.getPort());
-            sendToAll(message);
-        } else {
-            System.out.println(message);
         }
     }
 }

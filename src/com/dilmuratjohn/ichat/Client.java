@@ -9,7 +9,7 @@ class Client {
     private String name, address;
     private InetAddress ip;
     private int port;
-    private boolean running = false;
+    private String id;
 
     Client(String name, String address, int port) {
         this.name = name;
@@ -40,35 +40,29 @@ class Client {
         return true;
     }
 
-    void receive() {
-        Thread receive = new Thread("Client") {
-            public void run() {
-                while (running) {
-                    byte[] data = new byte[1024];
-                    DatagramPacket packet = new DatagramPacket(data, data.length);
-                    try {
-                        socket.receive(packet);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    String message = new String(packet.getData(), packet.getOffset(), packet.getLength());
-                }
-            }
-        };
-        receive.start();
+    String receive() {
+        byte[] data = new byte[1024];
+        DatagramPacket packet = new DatagramPacket(data, data.length);
+        try {
+            socket.receive(packet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String string = new String(packet.getData(), packet.getOffset(), packet.getLength());
+        if (string.startsWith("/c/")) {
+            id = string.substring(3);
+            return "connection succeed.";
+        } else {
+            return string;
+        }
     }
 
     void send(final byte[] data) {
-        Thread mThreadSend = new Thread("send") {
-            public void run() {
-                DatagramPacket packet = new DatagramPacket(data, data.length, ip, port);
-                try {
-                    socket.send(packet);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        mThreadSend.start();
+        DatagramPacket packet = new DatagramPacket(data, data.length, ip, port);
+        try {
+            socket.send(packet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
