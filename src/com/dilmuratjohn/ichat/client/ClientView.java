@@ -129,6 +129,11 @@ class ClientView extends JFrame {
         JMIExit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (running) {
+                    client.send(Globals.Prefix.DISCONNECTION + client.getId());
+                    client.close();
+                }
+                running = false;
                 dispose();
             }
         });

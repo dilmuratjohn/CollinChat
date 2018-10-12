@@ -28,3 +28,4 @@
 > - **Ep.26 Kicking Clients**
 > - **Ep.27 Online Users**
 > - **Ep.28 Server Quit**
+> - **Ep.29 Client Exit**
