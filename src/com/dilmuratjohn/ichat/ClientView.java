@@ -151,6 +151,9 @@ class ClientView extends JFrame {
                     console("Connection succeed.\n");
                 } else if (message.startsWith(Globals.Prefix.PING.toString())) {
                     client.send(Globals.Prefix.PING.toString() + client.getId());
+                } else if (message.startsWith(Globals.Prefix.KICKED.toString())) {
+                    console("You are kicked by root.");
+                    running = false;
                 } else {
                     System.out.println(message);
                     console(message.substring(Globals.Prefix.MESSAGE.toString().length()));

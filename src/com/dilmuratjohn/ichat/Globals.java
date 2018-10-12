@@ -27,6 +27,12 @@ public class Globals {
                 return "/p/";
             }
         },
+
+        KICKED {
+            public String toString() {
+                return "/k/";
+            }
+        },
     }
 
     public enum Status {

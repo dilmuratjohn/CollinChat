@@ -132,6 +132,7 @@ public class Server implements Runnable {
                         System.out.println("[" + clients.get(i).getName() + "] kicked");
                         break;
                 }
+                send(Globals.Prefix.KICKED.toString().getBytes(), clients.get(i).getAddress(), clients.get(i).getPort());
                 clients.remove(clients.get(i));
             }
         }
