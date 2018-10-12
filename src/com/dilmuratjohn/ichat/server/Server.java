@@ -16,6 +16,7 @@ public class Server implements Runnable {
     private List<ServerClient> clients = new ArrayList<ServerClient>();
     private DatagramSocket socket;
     private final int MAX_RECEIVE_BYTES = 1024;
+    private final int MAX_ATTEMPTS = 5;
     private final int port;
     private boolean running = false;
 
@@ -40,9 +41,15 @@ public class Server implements Runnable {
         Thread manage = new Thread("manage") {
             public void run() {
                 while (running) {
+                    sendToAll(Prefix.PING.toString());
                     try {
-                        sleep(5000);
-                        System.out.println("current client total: " + clients.size());
+                        sleep(2000);
+                        for (int i = 0; i < clients.size(); i++) {
+                            if (clients.get(i).getAttempt() > MAX_ATTEMPTS)
+                                disconnect(clients.get(i).getId(), true);
+                            else
+                                clients.get(i).increaseAttempt();
+                        }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -83,16 +90,18 @@ public class Server implements Runnable {
             sendToAll(message);
         } else if (message.startsWith(Prefix.DISCONNECTION.toString())) {
             disconnect(message.substring(Prefix.DISCONNECTION.toString().length()), false);
+        } else if (message.startsWith(Prefix.PING.toString())) {
+            reduceAttempt(message.substring(Prefix.PING.toString().length()));
         } else {
             System.out.println(message);
         }
     }
 
-    private void disconnect(String data, boolean timeOut) {
+    private void disconnect(String id, boolean timeout) {
         for (ServerClient client : clients) {
-            if (client.getId().equals(data)) {
+            if (client.getId().equals(id)) {
                 clients.remove(client);
-                if (timeOut)
+                if (timeout)
                     System.out.println("[" + client.getName() + "] times out");
                 else
                     System.out.println("[" + client.getName() + "] left");
@@ -118,6 +127,14 @@ public class Server implements Runnable {
     private void sendToAll(String message) {
         for (ServerClient client : clients) {
             send(message.getBytes(), client.getAddress(), client.getPort());
+        }
+    }
+
+    private void reduceAttempt(String message) {
+        for (ServerClient client : clients) {
+            if (client.getId().equals(message)) {
+                client.setAttemptZero();
+            }
         }
     }
 }

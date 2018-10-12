@@ -149,6 +149,8 @@ class ClientView extends JFrame {
                 if (message.startsWith(Prefix.CONNECTION.toString())) {
                     client.setId(message.substring(Prefix.CONNECTION.toString().length()));
                     console("Connection succeed.\n");
+                } else if (message.startsWith(Prefix.PING.toString())) {
+                    client.send(Prefix.PING.toString() + client.getId());
                 } else {
                     System.out.println(message);
                     console(message.substring(Prefix.MESSAGE.toString().length()));

@@ -18,6 +18,12 @@ public enum Prefix {
             return "/m/";
         }
     },
+
+    PING {
+        public String toString() {
+            return "/p/";
+        }
+    },
 }
 
 

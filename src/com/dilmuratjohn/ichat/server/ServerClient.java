@@ -38,7 +38,13 @@ class ServerClient {
         ++this.attempt;
     }
 
+    void setAttemptZero() {
+        this.attempt = 0;
+    }
+
     int getAttempt() {
         return this.attempt;
     }
+
+
 }
