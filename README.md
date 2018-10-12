@@ -29,3 +29,4 @@
 > - **Ep.27 Online Users**
 > - **Ep.28 Server Quit**
 > - **Ep.29 Client Exit**
+> - **Ep.30 Server Help**

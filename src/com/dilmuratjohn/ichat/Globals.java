@@ -64,33 +64,33 @@ public class Globals {
 
     public enum Command {
 
-        COMMAND {
-            public String toString() {
-                return "/";
+        HELP{
+            public String toString(){
+                return "/help/";
             }
         },
 
-        END_ALL {
+        QUIT {
             public String toString() {
-                return "/end all/";
+                return "/quit/";
             }
         },
 
         SHOW_CLIENTS {
             public String toString() {
-                return "/show clients/";
+                return "/clients/";
             }
         },
 
         TOGGLE_RAW_MODE {
             public String toString() {
-                return "/toggle raw mode/";
+                return "/raw/";
             }
         },
 
         SEND_MESSAGE_TO_ALL {
             public String toString() {
-                return "/send message to all/";
+                return "/send/";
             }
         },
 

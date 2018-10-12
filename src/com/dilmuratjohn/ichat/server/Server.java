@@ -40,21 +40,29 @@ public class Server implements Runnable {
         Scanner scanner = new Scanner(System.in);
         while (running) {
             String command = scanner.nextLine();
-            if (command.startsWith(Globals.Command.COMMAND.toString())) {
-                if (command.equals(Globals.Command.END_ALL.toString())) {
-                    quit();
-                } else if (command.equals(Globals.Command.SHOW_CLIENTS.toString())) {
-                    System.out.println("total: " + clients.size());
-                    for (ServerClient client : clients)
-                        System.out.println("> [" + client.getName() + "] (" + client.getAddress() + ":" + client.getPort() + ") {" + client.getId() + "}");
-                } else if (command.equals(Globals.Command.TOGGLE_RAW_MODE.toString())) {
-                    this.raw = !raw;
-                } else if (command.startsWith(Globals.Command.SEND_MESSAGE_TO_ALL.toString())) {
-                    sendToAll(command);
-                } else if (command.startsWith(Globals.Command.KICK.toString())) {
-                    disconnect(command.substring(Globals.Command.KICK.toString().length()), Globals.Status.KICKED);
-                }
+            if (command.equals(Globals.Command.QUIT.toString())) {
+                quit();
+            } else if (command.equals(Globals.Command.SHOW_CLIENTS.toString())) {
+                System.out.println("total: " + clients.size());
+                for (ServerClient client : clients)
+                    System.out.println("> [" + client.getName() + "] (" + client.getAddress() + ":" + client.getPort() + ") {" + client.getId() + "}");
+            } else if (command.equals(Globals.Command.TOGGLE_RAW_MODE.toString())) {
+                this.raw = !raw;
+                command = raw ? "on" : "off";
+                System.out.println("Row mode " + command + ".");
+            } else if (command.startsWith(Globals.Command.HELP.toString())) {
+                help();
+            } else if (command.startsWith(Globals.Command.SEND_MESSAGE_TO_ALL.toString())) {
+                sendToAll(command);
+            } else if (command.startsWith(Globals.Command.KICK.toString())) {
+                disconnect(command.substring(Globals.Command.KICK.toString().length()), Globals.Status.KICKED);
+            } else {
+                System.out.println("unknown commend.");
+                System.out.println("there is a help for you:");
+                help();
             }
+            ;
+
         }
     }
 
@@ -170,8 +178,17 @@ public class Server implements Runnable {
         }
     }
 
-    private void quit(){
-        for(int i = 0; i < clients.size(); i++){
+    private void help() {
+        System.out.println("[" + Globals.Command.TOGGLE_RAW_MODE + "] - toggle raw mode.");
+        System.out.println("[" + Globals.Command.QUIT + "] - shut down the server.");
+        System.out.println("[" + Globals.Command.HELP + "] - get help.");
+        System.out.println("[" + Globals.Command.SEND_MESSAGE_TO_ALL + "] - send message to all clients.");
+        System.out.println("[" + Globals.Command.KICK + "] - kick a user.");
+        System.out.println("[" + Globals.Command.SHOW_CLIENTS + "] - show all connected clients.");
+    }
+
+    private void quit() {
+        for (int i = 0; i < clients.size(); i++) {
             disconnect(clients.get(i).getId(), Globals.Status.KICKED);
         }
         running = false;
