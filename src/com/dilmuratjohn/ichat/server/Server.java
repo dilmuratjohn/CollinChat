@@ -42,7 +42,7 @@ public class Server implements Runnable {
             String command = scanner.nextLine();
             if (command.startsWith(Globals.Command.COMMAND.toString())) {
                 if (command.equals(Globals.Command.END_ALL.toString())) {
-                    System.exit(-1);
+                    quit();
                 } else if (command.equals(Globals.Command.SHOW_CLIENTS.toString())) {
                     System.out.println("total: " + clients.size());
                     for (ServerClient client : clients)
@@ -168,5 +168,14 @@ public class Server implements Runnable {
                 client.setAttemptZero();
             }
         }
+    }
+
+    private void quit(){
+        for(int i = 0; i < clients.size(); i++){
+            disconnect(clients.get(i).getId(), Globals.Status.KICKED);
+        }
+        running = false;
+        socket.close();
+        System.exit(-1);
     }
 }
