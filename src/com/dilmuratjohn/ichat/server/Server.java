@@ -61,8 +61,7 @@ public class Server implements Runnable {
                 System.out.println("there is a help for you:");
                 help();
             }
-            ;
-
+            scanner.close();
         }
     }
 

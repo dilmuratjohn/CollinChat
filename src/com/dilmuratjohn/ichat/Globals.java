@@ -64,8 +64,8 @@ public class Globals {
 
     public enum Command {
 
-        HELP{
-            public String toString(){
+        HELP {
+            public String toString() {
                 return "/help/";
             }
         },
