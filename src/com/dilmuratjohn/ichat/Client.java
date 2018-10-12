@@ -5,12 +5,13 @@ import java.net.*;
 
 class Client {
 
+    private final int MAX_RECEIVE_BYTES = 1024;
+
     private DatagramSocket socket;
     private String name, address;
     private InetAddress ip;
     private int port;
     private String id;
-    private final int MAX_BYTES = 1024;
 
     Client(String name, String address, int port) {
         this.name = name;
@@ -46,12 +47,13 @@ class Client {
     }
 
     String receive() {
-        byte[] data = new byte[MAX_BYTES];
+        byte[] data = new byte[MAX_RECEIVE_BYTES];
         DatagramPacket packet = new DatagramPacket(data, data.length);
         try {
             socket.receive(packet);
         } catch (IOException e) {
             e.printStackTrace();
+            return "connection err.";
         }
         return new String(packet.getData(), packet.getOffset(), packet.getLength());
     }

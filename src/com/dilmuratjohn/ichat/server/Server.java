@@ -15,7 +15,7 @@ public class Server implements Runnable {
 
     private List<ServerClient> clients = new ArrayList<ServerClient>();
 
-    private final int MAX_BYTES = 1024;
+    private final int MAX_RECEIVE_BYTES = 1024;
 
     private int mPort;
     private DatagramSocket mSocket;
@@ -53,7 +53,7 @@ public class Server implements Runnable {
         Thread receive = new Thread("receive") {
             public void run() {
                 while (running) {
-                    byte[] data = new byte[MAX_BYTES];
+                    byte[] data = new byte[MAX_RECEIVE_BYTES];
                     DatagramPacket packet = new DatagramPacket(data, data.length);
                     try {
                         mSocket.receive(packet);
