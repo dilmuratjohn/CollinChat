@@ -1,6 +1,6 @@
 package com.dilmuratjohn.ichat.server;
 
-import com.dilmuratjohn.ichat.Prefix;
+import com.dilmuratjohn.ichat.Globals;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -40,20 +40,20 @@ public class Server implements Runnable {
         Scanner scanner = new Scanner(System.in);
         while (running) {
             String command = scanner.nextLine();
-            if (command.equals("/end all.")) {
-                System.exit(-1);
-            }
-            if (command.equals("/clients")) {
-                System.out.println("total: " + clients.size());
-                for (ServerClient client : clients) {
-                    System.out.println("> [" + client.getName() + "] (" + client.getAddress() + ":" + client.getPort() + ") {" + client.getId() + "}");
+            if (command.startsWith(Globals.Command.COMMAND.toString())) {
+                if (command.equals(Globals.Command.END_ALL.toString())) {
+                    System.exit(-1);
+                } else if (command.equals(Globals.Command.SHOW_CLIENTS.toString())) {
+                    System.out.println("total: " + clients.size());
+                    for (ServerClient client : clients)
+                        System.out.println("> [" + client.getName() + "] (" + client.getAddress() + ":" + client.getPort() + ") {" + client.getId() + "}");
+                } else if (command.equals(Globals.Command.TOGGLE_RAW_MODE.toString())) {
+                    this.raw = !raw;
+                } else if (command.startsWith(Globals.Command.SEND_MESSAGE_TO_ALL.toString())) {
+                    sendToAll(command);
+                } else if (command.startsWith(Globals.Command.KICK.toString())) {
+                    disconnect(command.substring(Globals.Command.KICK.toString().length()), Globals.Status.KICKED);
                 }
-            }
-            if (command.equals("/raw")) {
-                this.raw = !raw;
-            }
-            if (command.startsWith("/m/")) {
-                sendToAll(command);
             }
         }
     }
@@ -62,12 +62,12 @@ public class Server implements Runnable {
         Thread manage = new Thread("manage") {
             public void run() {
                 while (running) {
-                    sendToAll(Prefix.PING.toString());
+                    sendToAll(Globals.Prefix.PING.toString());
                     try {
                         sleep(2000);
                         for (int i = 0; i < clients.size(); i++) {
                             if (clients.get(i).getAttempt() > MAX_ATTEMPTS)
-                                disconnect(clients.get(i).getId(), true);
+                                disconnect(clients.get(i).getId(), Globals.Status.TIMEOUT);
                             else
                                 clients.get(i).increaseAttempt();
                         }
@@ -101,32 +101,38 @@ public class Server implements Runnable {
     private void process(final DatagramPacket packet) {
         String message = new String(packet.getData(), packet.getOffset(), packet.getLength());
         if (raw) System.out.println(message);
-        if (message.startsWith(Prefix.CONNECTION.toString())) {
+        if (message.startsWith(Globals.Prefix.CONNECTION.toString())) {
             UUID id = UUID.randomUUID();
-            clients.add(new ServerClient(message.substring(Prefix.CONNECTION.toString().length()), packet.getAddress(), packet.getPort(), id));
-            System.out.println("[" + message.substring(Prefix.CONNECTION.toString().length()) + "] in");
-            message = Prefix.CONNECTION.toString() + id;
+            clients.add(new ServerClient(message.substring(Globals.Prefix.CONNECTION.toString().length()), packet.getAddress(), packet.getPort(), id));
+            System.out.println("[" + message.substring(Globals.Prefix.CONNECTION.toString().length()) + "] in");
+            message = Globals.Prefix.CONNECTION.toString() + id;
             send(message.getBytes(), packet.getAddress(), packet.getPort());
-        } else if (message.startsWith(Prefix.MESSAGE.toString())) {
+        } else if (message.startsWith(Globals.Prefix.MESSAGE.toString())) {
             sendToAll(message);
-        } else if (message.startsWith(Prefix.DISCONNECTION.toString())) {
-            disconnect(message.substring(Prefix.DISCONNECTION.toString().length()), false);
-        } else if (message.startsWith(Prefix.PING.toString())) {
-            reduceAttempt(message.substring(Prefix.PING.toString().length()));
+        } else if (message.startsWith(Globals.Prefix.DISCONNECTION.toString())) {
+            disconnect(message.substring(Globals.Prefix.DISCONNECTION.toString().length()), Globals.Status.LEFT);
+        } else if (message.startsWith(Globals.Prefix.PING.toString())) {
+            reduceAttempt(message.substring(Globals.Prefix.PING.toString().length()));
         } else {
             System.out.println(message);
         }
     }
 
-    private void disconnect(String id, boolean timeout) {
-        for (ServerClient client : clients) {
-            if (client.getId().equals(id)) {
-                clients.remove(client);
-                if (timeout)
-                    System.out.println("[" + client.getName() + "] times out");
-                else
-                    System.out.println("[" + client.getName() + "] left");
-                break;
+    private void disconnect(String id, Globals.Status status) {
+        for (int i = 0; i < clients.size(); i++) {
+            if (clients.get(i).getId().equals(id)) {
+                switch (status) {
+                    case TIMEOUT:
+                        System.out.println("[" + clients.get(i).getName() + "] times out");
+                        break;
+                    case LEFT:
+                        System.out.println("[" + clients.get(i).getName() + "] left");
+                        break;
+                    case KICKED:
+                        System.out.println("[" + clients.get(i).getName() + "] kicked");
+                        break;
+                }
+                clients.remove(clients.get(i));
             }
         }
     }

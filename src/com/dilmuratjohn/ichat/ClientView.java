@@ -34,7 +34,7 @@ class ClientView extends JFrame {
             running = true;
             System.out.println("Connection succeed." + address + ":" + port);
             console("Attempting a connection to " + address + ":" + port + ", user: " + name + "...");
-            String connection = Prefix.CONNECTION + name;
+            String connection = Globals.Prefix.CONNECTION + name;
             client.send(connection);
             receive();
         }
@@ -96,7 +96,7 @@ class ClientView extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                client.send(Prefix.DISCONNECTION + client.getId());
+                client.send(Globals.Prefix.DISCONNECTION + client.getId());
                 client.close();
                 running = false;
             }
@@ -131,7 +131,7 @@ class ClientView extends JFrame {
         message = message.trim();
         if (message.equals("")) return;
 
-        message = Prefix.MESSAGE +
+        message = Globals.Prefix.MESSAGE +
                 new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) +
                 "   " +
                 client.getName() +
@@ -146,14 +146,14 @@ class ClientView extends JFrame {
         new Thread(() -> {
             while (running) {
                 String message = client.receive();
-                if (message.startsWith(Prefix.CONNECTION.toString())) {
-                    client.setId(message.substring(Prefix.CONNECTION.toString().length()));
+                if (message.startsWith(Globals.Prefix.CONNECTION.toString())) {
+                    client.setId(message.substring(Globals.Prefix.CONNECTION.toString().length()));
                     console("Connection succeed.\n");
-                } else if (message.startsWith(Prefix.PING.toString())) {
-                    client.send(Prefix.PING.toString() + client.getId());
+                } else if (message.startsWith(Globals.Prefix.PING.toString())) {
+                    client.send(Globals.Prefix.PING.toString() + client.getId());
                 } else {
                     System.out.println(message);
-                    console(message.substring(Prefix.MESSAGE.toString().length()));
+                    console(message.substring(Globals.Prefix.MESSAGE.toString().length()));
                 }
             }
         }).start();
@@ -164,4 +164,3 @@ class ClientView extends JFrame {
         JTHistory.setCaretPosition(JTHistory.getDocument().getLength());
     }
 }
-
